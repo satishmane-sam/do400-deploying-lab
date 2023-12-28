@@ -30,11 +30,22 @@ environment { QUAY = credentials('QUAY_USER') }
                 '''
             }
         }
+	stage('Deploy to TEST') {
+    when { not { branch "main" } }
+
+    steps {
+        sh """
+            oc set image deployment home-automation \
+            home-automation=quay.io/${QUAY_USR}/do400-deploying-lab:build-${BUILD_NUMBER} \
+            -n bwtjbm-deploying-lab-test --record
+        """
+    }
+}
 
 	stage('Deploy to PROD') {
-    	when { branch "main" }
+    when { branch "main" }
 
-    	steps {
+    steps {
         sh """
             oc set image deployment home-automation \
             home-automation=quay.io/${QUAY_USR}/do400-deploying-lab:build-${BUILD_NUMBER} \
@@ -42,6 +53,5 @@ environment { QUAY = credentials('QUAY_USER') }
         """
     }
 }
-
     }
 }
